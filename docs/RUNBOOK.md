@@ -44,14 +44,14 @@
 
    ```powershell
    npx --yes wrangler secret put GITHUB_TOKEN    # 上一步的 PAT
-   npx --yes wrangler secret put MUSE_API_TOKEN  # node -e 生成的 64 位 hex
+   npx --yes wrangler secret put MUSE_API_TOKEN  # 值取本机 .dev.vars 里的 MUSE_API_TOKEN
    npx --yes wrangler deploy
    ```
 
 4. 验证：
 
    ```powershell
-   curl https://lotus-muse-api.<你的子域>.workers.dev/health
+   curl https://lotus-muse-api.smartlotus1130.workers.dev/health
    ```
 
    期望 `{"ok":true,"mode":"live",...}`。`mode` 仍是 `dry-run` 说明
@@ -111,7 +111,33 @@ node scripts/live-verify.mjs --expect "<这次独有的文字>" --entry <seq>
 6. 都没问题但内容仍旧：检查 `content/site.json` 的 `base_url` 是否指向
    你正在看的域名（多项目并存时最容易错这里）。
 
-## 8. 本地演练（不依赖任何云）
+## 8. 把线上追平到仓库（本轮交付时留下的欠账）
+
+本轮线上版本落后于仓库，原因是 wrangler 的 OAuth token 在 2026-11-06T08:01Z 到期，
+之后的两次部署动作没法再做。落后状态是明确的、可一次性补平的：
+
+| 落后项 | 线上 | 仓库 |
+|---|---|---|
+| Worker 版本 | `7e04985a`（07:49Z） | 其后还有 3 处修复：路由参数匹配、`gh.put` 必须先读 sha、错误信息带原因且不泄漏 token |
+| Pages 记录数 | 2 条（deployment `f4061d39`） | 3 条（`#0003` 由本机 CLI 写入） |
+
+按序执行（PowerShell，仓库根目录）：
+
+```powershell
+cd C:\Users\28389\Desktop\myblognew\lotus-muse-site
+npx --yes wrangler login          # 唯一必须你本人点浏览器的动作
+node scripts/lotus.mjs build      # 用仓库里的 content/ 重新生成 site/
+npx --yes wrangler pages deploy site --project-name lotus-muse-site --branch main --commit-dirty=true
+cd api
+npx --yes wrangler deploy
+npx --yes wrangler secret put MUSE_API_TOKEN   # 值在本机 .dev.vars 里，别贴到聊天
+node ../scripts/live-verify.mjs --base https://lotus-muse-site.pages.dev --expect "命令行写入的一条记录"
+```
+
+判据不是"deploy 打印了 Success"，而是最后一行 `live-verify` 全 PASS——
+它真的去公网取回字节并逐条断言。
+
+## 9. 本地演练（不依赖任何云）
 
 ```powershell
 node scripts/lotus.mjs build                    # 本地全量构建

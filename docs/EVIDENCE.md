@@ -24,6 +24,15 @@
 | B3 | Pages 通道端到端可用：探针部署 + 从公网取回字节 + 断言标记存在 | 完成（HTTP 200，`BOOTMARKER-7f3a9c` 命中 1 次，deployment `b97a1bf5.lotus-muse-site.pages.dev`） | `node scripts/live-verify.mjs --base https://lotus-muse-site.pages.dev --expect <marker>` |
 | B4 | 本地 `git init -b main` + remote 指向新仓库；`core.autocrlf=false`（避免本机 autocrlf 打穿字节比对） | 完成 | `git -C lotus-muse-site config --get core.autocrlf` |
 | B5 | Muse 入口 token 已生成（35 字符，只写入 gitignored 的 `.dev.vars`，不进聊天、不进仓库） | 完成 | `grep -c . .dev.vars`；`git check-ignore -v .dev.vars` |
+| B6 | 真实站点已上线：`https://lotus-muse-site.pages.dev/` HTTP 200，首页含站点名与两条记录标题，产物里零 `undefined.NaN` 污染；构建确定性成立（两次构建字节相同） | 完成（deployment `f4061d39`，07:43Z） | `curl -s https://lotus-muse-site.pages.dev/ \| grep -c 把站点交给` |
+| B7 | Worker 已上线并注入 `MUSE_API_TOKEN`：`https://lotus-muse-api.smartlotus1130.workers.dev` | 完成（版本 `7e04985a`，07:49Z） | `curl .../health`；`npx wrangler deployments list` |
+| B8 | **Muse 的调用形状在公网被证实**：`GET /health` 200 且报 `mode:"dry-run"`；`GET /capabilities` 无 token 401、带 token 200 并回真实 scopes；`POST /entries` 带 token 返回 200，`planned_files` 共 16 项，全部落在 `content/ site/ backups/` 前缀内、越界项 0，序号取到 3，`deploy.url` 指向 `/entries/0003.html` | 完成，原始响应存档在 `docs/evidence-live-post.json` | `curl -X POST -H "Authorization: Bearer $(grep MUSE_API_TOKEN .dev.vars \| cut -d= -f2)" -H 'content-type: application/json' -d '{...}' .../entries` |
+| B9 | 未鉴权写请求被拒：无 token 的 `POST /entries` 返回 401 | 完成（公网实测） | 同上，去掉 Authorization 头 |
+| B10 | 本机 CLI 真实写入一条记录并接续序号、快照、重建、提交：`#0003 2026.11.6 下午 命令行写入的一条记录`，提交 `062e099` | 完成 | `node scripts/lotus.mjs status`；`git show 062e099 --stat` |
+| B11 | 回滚真实往返：先 `restore` 到 0003 之前（首页命中数变 0，提交 `6d0e996`），再 `restore` 回本次快照（命中数回到 1，提交 `9abfd66`） | 完成 | `node scripts/lotus.mjs restore --backup backups/<目录>`；`grep -c 命令行写入 site/index.html` |
+| B12 | 测试 89/89 全绿（model 27 / template 21 / build 合同 7 / http 路由 7 / gh 客户端 11 / worker 16） | 完成 | `npm test` |
+| B13 | 代码与内容已推送，且**远端 SHA 与本地相等** | 完成 `9abfd66342ed07667a8721c622038b617d064392` | `git rev-parse HEAD` 与 `gh api repos/smartlotus/lotus-muse-site/commits/main --jq .sha` 对读 |
+| B14 | 原仓库零改动：`lotussblog`、`lotussmindstream`、`LotusSiteManager` 及本地三份博客副本本轮未被写入 | 完成（只读检查） | `git -C .../lotussblog status`；目录 mtime |
 
 ## C. 尚需人类动作（不是能力缺口，是授权边界）
 
@@ -33,12 +42,17 @@
 | C2 | 在 Muse 的安全密钥入口（自定义连接器 `credentials.request_api_access` 生成的托管连接页）填入 `.dev.vars` 里那把 `MUSE_API_TOKEN` | 只有你的 Muse 账号能操作 |
 | C3 | 让 wrangler 重新登录一次：`npx wrangler login`（现有 OAuth token 今日 08:01Z 过期） | OAuth 授权必须你本人在浏览器完成 |
 
-## D. 待跑完的判据（交付前必须全绿，见 CONTRACT §6）
+## D. 判据完成情况（对照 CONTRACT §6）
 
-- [ ] `node --test tests/` 全绿，且每条断言都能因退化而变红
-- [ ] 构建确定性：同输入两次 `buildSite` 字节相同
-- [ ] 本机 CLI 真实产出一条记录并提交/推送到 B1 仓库
-- [ ] Worker 部署上线，`/health` 与 `/capabilities` 公网可达
-- [ ] 未鉴权写请求 → 401；鉴权 dry-run 写请求 → `planned_files` 完整且零外部调用
-- [ ] 配好 C1 后：一次真实 `POST /entries` → GitHub 出现 `lotus-muse-bot` 提交 → Pages 直传成功 → 线上页真的含新文本
-- [ ] 一次真实回滚：`restore --backup …` 后线上页回到旧内容
+- [x] `npm test` 全绿 89/89；且每条都能因退化变红（本轮实测抓出 4 个真缺陷：
+  路由 `:param` 永不匹配、日期正则缺捕获组、`gh.put` 可盲目覆盖、构建产物越界前缀）
+- [x] 构建确定性：同输入两次 `buildSite` 字节相同（`tests/build-contract.test.mjs`）
+- [x] 本机 CLI 真实产出记录并提交/推送（B10、B13）
+- [x] Worker 部署上线，`/health` 与 `/capabilities` 公网可达（B7、B8）
+- [x] 未鉴权写 → 401；鉴权 dry-run 写 → `planned_files` 完整且零外部调用（B8、B9；
+  零网络那条由 `tests/worker.test.mjs` 的 fetch 间谍断言）
+- [ ] **配好 C1 后**：一次真实 `POST /entries` → GitHub 出现 `lotus-muse-bot` 提交 →
+  Pages 部署成功 → 线上页真的含新文本（Worker 提交代码路径目前只有注入式假 fetch 的单测覆盖，
+  未经真实 GitHub 验证）
+- [ ] **配好 C1+C3 后**：重部署 Worker 与 Pages，使线上版本追平仓库
+  （当前线上 Worker 是 `7e04985a`，其后仓库还有 3 处修复；线上 Pages 是 2 条记录，仓库已是 3 条）

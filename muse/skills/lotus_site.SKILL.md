@@ -16,7 +16,7 @@ metadata: { "includeInPrompt": false }
 ## Tooling
 
 所有路径都相对于连接器绑定的 Base URL（形如
-`https://lotus-muse-api.<account-subdomain>.workers.dev`）。
+`https://lotus-muse-api.smartlotus1130.workers.dev`）。
 写请求必须带 `Authorization: Bearer <连接器持有的 API Key>`。
 一切响应 `Content-Type: application/json`，形状恒为 `{ "ok": boolean, ... }`；
 失败为 `{"ok":false,"error":{"code":"…","message":"…"}}`。
@@ -51,9 +51,9 @@ metadata: { "includeInPrompt": false }
 写响应形状（POST /entries 为例）：
 `{"ok":true,"mode":"live","entry":{…},"commit_sha":"…","commit_url":"…",`
 `"changed_files":[…],"journal":{…},`
-`"deploy":{"hint":"Pages 自动构建","url":"https://…/entries/0007.html"}}`
+`"deploy":{"hint":"已直传 Pages","url":"https://…/entries/0007.html"}}`
 `mode:"dry-run"` 表示 Worker 未配置 GitHub 写入凭据，不写仓库，
-额外返回 `planned_files:[{path,content}]`；dry-run 不是失败，但也没有真正生效。
+额外返回 `planned_files:[{path,bytes}]`（只报路径与字节数，不含正文）；dry-run 不是失败，但也没有真正生效。
 
 错误码（`error.code`）：
 `unauthorized`(401) `forbidden`(403) `not_found`(404) `method_not_allowed`(405)

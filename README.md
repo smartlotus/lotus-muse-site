@@ -51,6 +51,31 @@ npm test
 ## 当前状态
 
 <!-- OWNER-VERIFY -->
-（此节由仓库主人最终核对后填写：哪些命令已在真机跑通、Worker 是否已部署、
-Muse 连接是否成功、Pages 域名是否生效。协作者请勿代填。）
+核对时间 2026-11-06（UTC）。逐条判据与复算方式在 `docs/EVIDENCE.md`，这里只给结论。
+
+已在真机跑通：
+
+- `npm test`：89/89 全绿。测试不是摆设——它在本轮抓出 4 个真缺陷（带 `:param` 的路由整体 404、
+  日期正则缺捕获组导致日期被写成 `undefined.NaN.NaN`、`gh.put` 可盲目覆盖、产物越界前缀）。
+- 构建确定性：同一份 `content/` 两次构建产物字节相同。
+- 本机命令行闭环：`add-entry` 真实写入 `#0003`（快照 → 接续序号 → 重建 → 提交 `062e099`），
+  并完成回滚往返（`6d0e996` 退回到 0003 之前 → `9abfd66` 恢复回来），两次都用首页命中数验证。
+- Pages 已上线：`https://lotus-muse-site.pages.dev/` 返回 200，首页含站点名与记录标题，
+  产物里零脏日期。
+- Worker 已上线：`https://lotus-muse-api.smartlotus1130.workers.dev`，
+  并且**用 Muse 会被允许的那一种调用形状实测过**——无 token 的写请求 401，
+  带 token 的 `POST /entries` 返回 200 且 `planned_files` 16 项全部落在允许前缀内。
+  原始响应存在 `docs/evidence-live-post.json`。
+- 代码与内容已推送，远端 SHA 与本地相等（`9abfd66…`）。
+
+尚未跑通，缺的都是授权而不是能力：
+
+- Worker 的真实 GitHub 提交（写仓库 + 部署）需要一把**只限本仓库、只有 Contents 读写**的
+  fine-grained PAT，GitHub 没有任何 API 能替人铸造它。
+- Muse 侧的连接需要你在它的安全密钥入口填 `MUSE_API_TOKEN`（值在 `.dev.vars`，不进仓库也不进聊天）。
+- 线上版本落后于仓库：Worker 是 `7e04985a`（其后仓库又有 3 处修复），Pages 是 2 条记录而仓库已是 3 条。
+  本机 wrangler 的 OAuth token 已在今天 08:01Z 过期，追平需要一次 `npx wrangler login`。
+  补做这三步的顺位与命令在 `docs/RUNBOOK.md`。
+
+原仓库零改动：`lotussblog`、`lotussmindstream`、`LotusSiteManager` 以及本地三份博客副本本轮只被读取过。
 <!-- /OWNER-VERIFY -->

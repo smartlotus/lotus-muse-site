@@ -146,7 +146,7 @@ makeEvent(partial)            -> event  // 补齐 ts/schema 默认
 
 ## 4. HTTP API
 
-Base：`https://lotus-muse-api.<account-subdomain>.workers.dev`
+Base：`https://lotus-muse-api.smartlotus1130.workers.dev`
 读接口公开；写接口需 `Authorization: Bearer <MUSE_API_TOKEN>`。
 一切响应 `Content-Type: application/json`，形状恒为 `{ "ok": boolean, ... }`；
 失败为 `{"ok":false,"error":{"code":"…","message":"…"}}`。
@@ -183,10 +183,11 @@ Base：`https://lotus-muse-api.<account-subdomain>.workers.dev`
 ```json
 {"ok":true,"mode":"live","entry":{…},"commit_sha":"…","commit_url":"…",
  "changed_files":["content/entries/0007.json","site/index.html",…],
- "journal":{…},"deploy":{"hint":"Pages 自动构建","url":"https://…/entries/0007.html"}}
+ "journal":{…},"deploy":{"hint":"已直传 Pages","url":"https://…/entries/0007.html"}}
 ```
 dry-run 模式（Worker 未配 GITHUB_TOKEN 时）：不写仓库，返回同一形状但
-`mode:"dry-run"`、`commit_sha:null`、多一个 `planned_files:[{path,content}]`。
+`mode:"dry-run"`、`commit_sha:null`、多一个 `planned_files:[{path,bytes}]`
+（只报路径与字节数，不把整站产物正文塞进一次响应；要正文就再发一次 `GET`）。
 
 错误码（`error.code`）：
 `unauthorized`(401) `forbidden`(403) `not_found`(404) `method_not_allowed`(405)
