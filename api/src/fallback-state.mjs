@@ -1,5 +1,5 @@
 // 由 scripts/make-fallback.mjs 生成，不要手改。
-export const GENERATED_AT = "2026-11-06T07:47:24.579Z";
+export const GENERATED_AT = "2026-11-06T10:07:49.989Z";
 
 export const STATE = {
   "site": {
@@ -9,10 +9,10 @@ export const STATE = {
     "slug": "lotus-muse-site",
     "subtitle": "由 Muse 维护的个人记录",
     "sort_direction": "newest_first",
-    "next_sequence": 3,
+    "next_sequence": 4,
     "base_url": "https://lotus-muse-site.pages.dev",
     "created_at": "2026-11-06T07:38:00.000Z",
-    "updated_at": "2026-11-06T07:38:00.000Z"
+    "updated_at": "2026-11-06T09:12:43Z"
   },
   "entries": [
     {
@@ -49,6 +49,24 @@ export const STATE = {
       "updated_at": "2026-11-08T14:05:00Z",
       "source": "muse",
       "author": "lotus-muse-bot"
+    },
+    {
+      "schema_version": 1,
+      "id": "db70af37e82509ecf79e14dcbcd3d971",
+      "sequence": 3,
+      "date": "2026.11.6",
+      "time_label": "下午",
+      "title": "命令行写入的一条记录",
+      "body": "这一条是用本机命令行写入的，用来验证同一套内容模型在\"没有 Worker、没有 Muse\"的路径上也能走通：\n写入前先快照，序号自动接续，构建产物与数据一起变更。\n\n命令行与 Worker 走的是同一份 lib，所以两条路产生的结果可以逐字节对比。\n",
+      "images": [],
+      "tags": [
+        "验证",
+        "命令行"
+      ],
+      "created_at": "2026-11-06T09:12:43Z",
+      "updated_at": "2026-11-06T09:12:43Z",
+      "source": "local",
+      "author": "lotus"
     }
   ],
   "pages": [
@@ -98,6 +116,36 @@ export const STATE = {
       "backup": "backups/2026-11-06T07-42-11Z",
       "ok": true,
       "note": null
+    },
+    {
+      "ts": "2026-11-06T07:52:07Z",
+      "actor": "local",
+      "action": "restore",
+      "target": "backups/2026-11-06T07-47-35Z",
+      "commit_sha": null,
+      "backup": "backups/2026-11-06T07-52-06Z",
+      "ok": true,
+      "note": null
+    },
+    {
+      "ts": "2026-11-06T09:12:43Z",
+      "actor": "local",
+      "action": "entry.create",
+      "target": "0003",
+      "commit_sha": null,
+      "backup": "backups/2026-11-06T09-12-43Z",
+      "ok": true,
+      "note": "本机 e2e"
+    },
+    {
+      "ts": "2026-11-06T09:13:29Z",
+      "actor": "local",
+      "action": "restore",
+      "target": "backups/2026-11-06T09-13-26Z",
+      "commit_sha": null,
+      "backup": "backups/2026-11-06T09-13-29Z",
+      "ok": true,
+      "note": "回滚往返 B"
     }
   ],
   "fallback": true
