@@ -1,0 +1,2 @@
+{"ts":null,"actor":"local","action":"site.update","target":"lotus-muse-site","commit_sha":null,"backup":null,"ok":true,"note":"init"}
+{"ts":null,"actor":"local","action":"entry.create","target":"0001","commit_sha":null,"backup":"backups/2026-11-06T07-38-12Z","ok":true,"note":"首条记录"}

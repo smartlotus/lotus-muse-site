@@ -1,0 +1,43 @@
+version: 1
+connector: lotus_site
+display_name: "Lotus 站点"
+description: 读和写 lotus 个人站点的日志记录与网页，并可重新发布或从快照恢复
+actions:
+  read:
+    default: allow
+    label: 读取权限
+    methods:
+      site.read:
+        label: 读取站点清单、记录、页面与操作流水
+        approval_phrase: read the Lotus site
+  write:
+    default: ask
+    label: 写入与删除权限
+    methods:
+      entry.write:
+        label: 新增、修改、删除日志记录
+        approval_phrase: change journal entries on the Lotus site
+      page.write:
+        label: 新增、修改、删除独立网页
+        approval_phrase: change pages on the Lotus site
+      site.republish:
+        label: 重新发布站点
+        approval_phrase: republish the Lotus site
+      site.restore:
+        label: 从快照恢复站点
+        approval_phrase: restore the Lotus site from a backup
+
+consent_screen:
+  bullets:
+    - icon: data_types
+      title: "Muse 会读写你的个人站点"
+      text: "包括日志记录、独立网页和最近的操作流水，全部通过这一个站点 API 进行。"
+    - icon: info
+      title: "写操作每次都会先问你"
+      text: "新增、修改、删除、重新发布、恢复默认都先征求你的同意。断开连接随时可在 Settings 进行。"
+    - icon: caution
+      title: "请留意每次改动"
+      text: "Muse 可能做出意外操作，请留意。写操作会进入 GitHub 提交历史，可回滚；每次写入前还有一份本地快照备份。"
+  footer_paragraphs:
+    - "Muse 只持有这一个站点 API 的 Key，看不到也动不了你的 GitHub 账号凭据或 Cloudflare 账号。"
+    - "站点的源数据与历史提交保存在 GitHub 仓库 lotus-muse-site 中，可随时人工审查。"

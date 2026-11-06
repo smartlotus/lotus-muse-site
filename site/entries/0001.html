@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="generator" content="lotus-muse-site">
+  <title>把站点交给 Muse 维护的第一天 · lotus 日志</title>
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <main class="shell">
+    <aside class="site-ribbon"><strong>lotus 日志</strong><span>由 Muse 维护的个人记录</span></aside>
+    <nav class="site-nav" aria-label="站点导航">
+      <a class="nav-home" href="/">首页</a>
+      <ul class="nav-list">
+      <li><a href="/pages/welcome.html">关于这个站点</a></li>
+      </ul>
+    </nav>
+    <header class="site-header">
+      <span class="site-kicker">lotus-muse-site</span>
+      <h1 class="site-title"><a href="/">lotus 日志</a></h1>
+      <p class="site-subtitle">由 Muse 维护的个人记录</p>
+    </header>
+    <section class="entry-single" aria-label="记录正文">
+      <article class="log-entry" id="entry-0001">
+        <div class="log-meta">
+          <time class="log-date">2026.11.6</time>
+          <span class="log-sequence">#0001</span>
+        </div>
+        <div class="log-content">
+          <h2 class="entry-title">把站点交给 Muse 维护的第一天</h2>
+          <p>从今天起，这个站点的日常维护不再需要我手动改 HTML。加一条记录、上一个新网页、改一段文字，都可以直接对 Muse 说一句话。</p>
+          <p>背后其实是三件事：内容以 JSON 存在仓库里；构建器把内容渲染成静态页面；接口在收到指令后先提交仓库、再部署到 Pages。任何一步失败都会明确报错，不会让线上和仓库悄悄分叉。</p>
+          <p>写操作之前会先把整个 content 目录快照到 backups，序号一经分配就不再改变，删掉也不回收。出问题时可以整树回滚，也可以只回滚某一条。</p>
+          <ul class="tag-list">
+            <li>站点维护</li>
+            <li>Muse</li>
+          </ul>
+        </div>
+        <nav class="entry-nav" aria-label="记录翻页">
+          <span class="entry-prev is-empty">已是第一条</span>
+          <a class="entry-next" href="/entries/0002.html">下一条 #0002 →</a>
+        </nav>
+      </article>
+    </section>
+    <footer class="footer">
+      <span>lotus 日志 · lotus-muse-site</span>
+      <span>内容以 JSON 存放在仓库里，构建为静态站点。<a href="/">返回索引</a></span>
+    </footer>
+  </main>
+</body>
+</html>

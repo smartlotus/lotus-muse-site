@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "site_id": "7f3a9c1e2b4d5f6a8c0e1d3f5a7b9c0d",
+  "name": "lotus 日志",
+  "slug": "lotus-muse-site",
+  "subtitle": "由 Muse 维护的个人记录",
+  "sort_direction": "newest_first",
+  "next_sequence": 3,
+  "base_url": "https://lotus-muse-site.pages.dev",
+  "created_at": "2026-11-06T07:38:00.000Z",
+  "updated_at": "2026-11-06T07:38:00.000Z"
+}

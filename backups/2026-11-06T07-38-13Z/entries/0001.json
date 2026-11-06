@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "6465dbc33b8a1f76e59d0ed4e073b8d6",
+  "sequence": 1,
+  "date": "undefined.NaN.NaN",
+  "time_label": "",
+  "title": "把站点交给 Muse 维护的第一天",
+  "body": "从今天起，这个站点的日常维护不再需要我手动改 HTML。\n加一条记录、上一个新网页、改一段文字，都可以直接对 Muse 说一句话。\n\n背后其实是三件事：内容以 JSON 存在仓库里；构建器把内容渲染成静态页面；接口在收到指令后先提交仓库、再部署到 Pages。\n任何一步失败都会明确报错，不会让线上和仓库悄悄分叉。",
+  "images": [],
+  "tags": [],
+  "created_at": "2026-11-06T07:38:12Z",
+  "updated_at": "2026-11-06T07:38:12Z",
+  "source": "local",
+  "author": "lotus"
+}

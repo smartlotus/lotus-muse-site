@@ -1,0 +1,17 @@
+name = "lotus-muse-api"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+GITHUB_OWNER = "smartlotus"
+GITHUB_REPO = "lotus-muse-site"
+GITHUB_BRANCH = "main"
+PUBLIC_BASE_URL = "https://lotus-muse-site.pages.dev"
+CLOUDFLARE_ACCOUNT_ID = "ff572908f83b35e7db8e764cc7d6f399"
+PAGES_PROJECT = "lotus-muse-site"
+
+# 密钥一律用 `wrangler secret put`，不写进本文件，也不进仓库：
+#   MUSE_API_TOKEN       Muse 那一侧唯一的 Bearer（见 .dev.vars）
+#   GITHUB_TOKEN         细粒度 PAT：只选 lotus-muse-site 一个仓库，只有 Contents 读写
+#   CLOUDFLARE_API_TOKEN 只做 Pages 上传的 API Token（不配则只提交仓库、不部署）
+# 未配 GITHUB_TOKEN 时 Worker 进入 dry-run：仍做全套校验并返回 planned_files，但不写仓库、不部署。

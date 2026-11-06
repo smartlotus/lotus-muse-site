@@ -1,0 +1,97 @@
+{
+  "ok": true,
+  "mode": "dry-run",
+  "reason": "Worker 未配置 GITHUB_TOKEN，未写入仓库",
+  "planned_files": [
+    {
+      "path": "backups/2026-11-06T07-52-17-718Z/content/entries/0001.json",
+      "bytes": 596
+    },
+    {
+      "path": "backups/2026-11-06T07-52-17-718Z/content/entries/0002.json",
+      "bytes": 601
+    },
+    {
+      "path": "backups/2026-11-06T07-52-17-718Z/content/pages/welcome.json",
+      "bytes": 464
+    },
+    {
+      "path": "backups/2026-11-06T07-52-17-718Z/content/site.json",
+      "bytes": 355
+    },
+    {
+      "path": "content/entries/0001.json",
+      "bytes": 596
+    },
+    {
+      "path": "content/entries/0002.json",
+      "bytes": 601
+    },
+    {
+      "path": "content/entries/0003.json",
+      "bytes": 238
+    },
+    {
+      "path": "content/journal.jsonl",
+      "bytes": 496
+    },
+    {
+      "path": "content/pages/welcome.json",
+      "bytes": 464
+    },
+    {
+      "path": "content/site.json",
+      "bytes": 355
+    },
+    {
+      "path": "site/assets/site.css",
+      "bytes": 7870
+    },
+    {
+      "path": "site/entries/0001.html",
+      "bytes": 1962
+    },
+    {
+      "path": "site/entries/0002.html",
+      "bytes": 1967
+    },
+    {
+      "path": "site/entries/0003.html",
+      "bytes": 1666
+    },
+    {
+      "path": "site/index.html",
+      "bytes": 3099
+    },
+    {
+      "path": "site/pages/welcome.html",
+      "bytes": 1299
+    }
+  ],
+  "planned_backup": "backups/2026-11-06T07-52-17-718Z",
+  "journal": {
+    "ts": "2026-11-06T07:52:17.718Z",
+    "actor": "muse",
+    "action": "entry.create",
+    "target": "0003",
+    "commit_sha": null,
+    "backup": "backups/2026-11-06T07-52-17-718Z",
+    "ok": true,
+    "note": "live probe"
+  },
+  "deploy": {
+    "url": "https://lotus-muse-site.pages.dev/entries/0003.html",
+    "uploaded": false
+  },
+  "entry": {
+    "schema_version": 1,
+    "id": "",
+    "sequence": 3,
+    "date": "2026.11.6",
+    "time_label": "",
+    "title": "����̽�룺Muse ��״д��",
+    "body": "������¼���ⲿ HTTP ����д��ӿڲ���������֤�� Muse ���õĵ�����״��ĳ�����",
+    "images": [],
+    "tags": []
+  }
+}

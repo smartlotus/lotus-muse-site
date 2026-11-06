@@ -1,0 +1,9 @@
+MUSE_API_TOKEN=<generate-your-own-32+chars>
+GITHUB_TOKEN=
+GITHUB_OWNER=smartlotus
+GITHUB_REPO=lotus-muse-site
+GITHUB_BRANCH=main
+PUBLIC_BASE_URL=https://lotus-muse-site.pages.dev
+CLOUDFLARE_ACCOUNT_ID=ff572908f83b35e7db8e764cc7d6f399
+PAGES_PROJECT=lotus-muse-site
+CLOUDFLARE_API_TOKEN=
