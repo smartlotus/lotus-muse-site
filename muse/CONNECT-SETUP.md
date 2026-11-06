@@ -73,22 +73,24 @@ node scripts/lotus.mjs build
 node scripts/serve-api.mjs --dry-run --port 8787   # 本地起 API 演练
 ```
 
-推送本身**不会**让线上更新：Pages 项目现在是"直传"形态（本轮建的就是这个形态），
-要让线上追平还得再跑一步部署：
+推送本身**就是部署**：GitHub Actions（`.github/workflows/pages.yml`）会在 push 到 main
+后自动构建 `site/` 并发布到 GitHub Pages（`https://smartlotus.github.io/lotus-muse-site/`）。
+所以 CLI 通道用 `--commit --push` 收尾即可，不需要任何手动部署步骤
+（2026-11-06 之前"推送后还要 wrangler 直传"的说法已过时）：
 
 ```powershell
-node scripts/lotus.mjs build
-npx --yes wrangler pages deploy site --project-name lotus-muse-site --branch main --commit-dirty=true
+node scripts/lotus.mjs add-entry --title "今天" --body "一句话" --tags 日常 --commit --push
+node scripts/live-verify.mjs --expect "这句话" --entry <seq>   # 默认打 base_url = github.io
 ```
 
-如果你按 `docs/RUNBOOK.md` 第 9 节把 Pages 换成 Git 自动构建，那么 push 即部署，上面这步就不需要了。
-也就是说：Muse 是省事的通道，CLI 是永远在的通道，而"部署"这一步现在仍是一次显式动作。
+也就是说：Muse 是省事的通道，CLI 是永远在的通道，而部署已经全自动。
 
-## 4.5 另一种分工：让 Muse 在它自己的云电脑里跑这套 CLI
+## 4.5 更省事的分工：让 Muse 在它自己的云电脑里跑这套 CLI（当前推荐）
 
-这不是幻想，而且代码侧已经具备条件（零第三方依赖、外部命令只有 `git`）。
-它和"给 Muse 一个接口"是两种架构，凭据面与漂移风险都不一样。
-先用 `muse/PROBE-VM.md` 让 Muse 实测它那台机器的四项能力，再按 `docs/RUNBOOK.md` 第 9 节切换。
+代码侧条件齐备（零第三方依赖、外部命令只有 `git`），部署侧条件也齐备
+（push 即 GitHub Pages 自动发布，不需要 Cloudflare）。只剩凭据注入一步，
+完整步骤、给 Muse 的首条指令与硬规矩见 [`muse/MODE-B-SETUP.md`](MODE-B-SETUP.md)；
+先用 `muse/PROBE-VM.md` 让 Muse 实测它那台机器的四项能力。
 
 ## 5. 断开与轮换
 

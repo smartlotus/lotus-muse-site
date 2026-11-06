@@ -10,7 +10,9 @@ metadata: { "includeInPrompt": false }
 
 通过 `lotus_site` 连接器维护 lotus 的个人站点：加一条记录、上一个新网页、改一篇、
 删一篇、重新发布、从快照恢复。站点源数据在 GitHub 仓库 `lotus-muse-site`，
-公开地址是 Cloudflare Pages 域名。所有读写都走这一个 HTTPS JSON API，
+公开地址是 `https://smartlotus.github.io/lotus-muse-site/`（GitHub Pages；
+写入成功即 push，push 自动触发部署，通常一两分钟内上线）。
+所有读写都走这一个 HTTPS JSON API，
 没有其他命令，也没有直接操作 Git、GitHub 或 Cloudflare 的能力。
 
 ## Tooling

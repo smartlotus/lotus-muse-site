@@ -6,19 +6,24 @@ Muse 说明书、测试）都必须逐字遵守这里的路径、字段名和函
 ## 0. 目标
 
 把 lotus 个人站点的日常维护（加一条记录 / 上一个新网页 / 改一篇 / 删一篇 / 重新发布）
-交给 Meta Muse 完成。Muse 侧只有一个 HTTPS JSON API + 单个 Bearer Token 可用
-（依据 Muse 自有文档 `~/docs/connectors.md:148`：无 connector 的服务只能走
-custom connector `credentials.request_api_access`，且"多把密钥/请求签名"的提供方会被拒绝）。
-因此所有写操作经 Worker API，由 Worker 用**单仓库细粒度 PAT**提交到本仓库，
-并由 Worker 用**只限 Pages 上传的 API Token**把构建产物直传 Cloudflare Pages
-（项目 `lotus-muse-site`，production branch `main`，直传免 Git 绑定，
-因此不依赖 Cloudflare 的 GitHub App 是否装在本仓库上；这与本机既有工具
-`LotusSiteManager/src/LotusSiteManager.Core/CloudflareService.cs:77` 用的
-`wrangler pages deploy` 同一部署形态）。Worker 侧内部有几把凭据与 Muse 无关：
-Muse 只持有自己那一个 Bearer Token，这才是 Muse 自定义连接器能吃下的形状。
-原 `lotussblog` 等既有仓库不被触碰。
+交给 Meta Muse 完成。Muse 有两条等价的写通道，都只给它**单仓库范围**的凭据：
 
-部署顺序的意义：先提交 GitHub（可追溯、可回滚），成功后才直传 Pages；
+- **模式 A（Worker API，可选）**：Muse 调一个 HTTPS JSON API（Cloudflare Worker），
+  依据 Muse 自有文档 `~/docs/connectors.md:148`（无 connector 的服务只能走
+  custom connector `credentials.request_api_access`，且"多把密钥/请求签名"的提供方
+  会被拒绝），所以 Worker 对 Muse 只暴露一把 Bearer Token。Worker 内部再用
+  **单仓库细粒度 PAT** 提交到本仓库；另有一条可选尾巴——配置了只限 Pages 上传的
+  API Token 时直传 Cloudflare Pages，2026-11-06 起该 token 未配置，尾巴停用，
+  Cloudflare Pages 上的旧副本（`lotus-muse-site.pages.dev`）不再追新。
+- **模式 B（Muse 云电脑直接跑 CLI，当前推荐）**：Muse 在自己的 VM 里克隆本仓库，
+  只调 `scripts/lotus.mjs` 完成同样的写操作并 push。见 `muse/MODE-B-SETUP.md`。
+
+两条通道的部署尾都是同一个：**push 到 main 触发 `.github/workflows/pages.yml`，
+GitHub Actions 构建 `site/` 并部署到 GitHub Pages**，公开地址
+`https://smartlotus.github.io/lotus-muse-site/`（`content/site.json` 的 `base_url`
+指向这里）。原 `lotussblog` 等既有仓库不被触碰。
+
+部署顺序的意义：先提交 GitHub（可追溯、可回滚），push 本身就是部署触发器；
 GitHub 提交失败则整个写操作返回失败且不部署，避免站点与仓库漂移。
 
 ## 1. 目录布局（仓库内）
@@ -29,7 +34,7 @@ content/entries/<seq>.json        一条日志记录，<seq> = 4 位零填充序
 content/pages/<slug>.json         一个独立网页
 content/journal.jsonl             操作流水，一行一个 JSON 事件（追加写）
 backups/<iso-ts>/…                每次写操作前的 content/ 全量快照（文本）
-site/                             构建产物 = Cloudflare Pages 输出目录（直接提交进仓库，Pages 免构建命令）
+site/                             构建产物 = GitHub Pages 输出目录（提交进仓库；CI 部署时会再构建一遍作核对）
   index.html                      首页：清单 + 全部记录倒序/正序
   entries/<seq>.html              单条记录页
   pages/<slug>.html               独立网页
@@ -65,7 +70,7 @@ muse/                             交给 Muse 的那一套（SKILL.md / manifest
   "subtitle": "string",
   "sort_direction": "newest_first | oldest_first",
   "next_sequence": 1,
-  "base_url": "https://lotus-muse-site.pages.dev",
+  "base_url": "https://smartlotus.github.io/lotus-muse-site/",
   "created_at": "ISO8601",
   "updated_at": "ISO8601"
 }
@@ -219,4 +224,5 @@ dry-run 模式（Worker 未配 GITHUB_TOKEN 时）：不写仓库，返回同一
 - 线上真实验证：`node scripts/live-verify.mjs` 取 Pages 线上页，断言本次 marker 字符串出现
   （不是断言"部署返回 200"）。
 - Worker 侧：`/health` 上线；未配 PAT 时写接口返回 `mode:"dry-run"` 且 planned_files 完整；
-  配了 PAT 后一次真实 POST 能在 GitHub 看到 `lotus-muse-bot` 的提交并触发 Pages 部署。
+  配了 PAT 后一次真实 POST 能在 GitHub 看到 `lotus-muse-bot` 的提交，push 触发
+  GitHub Actions 部署，公开地址（github.io）上能看到新内容。

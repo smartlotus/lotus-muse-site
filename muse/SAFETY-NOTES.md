@@ -15,6 +15,13 @@ Gmail、Google 全家桶这类服务，从未出现 git、GitHub、Cloudflare、
 结论：Muse 不能 clone、commit、push、开 PR、改仓库设置、触发 Pages 构建、
 也不能碰 Worker 的 secret。任何此类说法都是它在自己发明能力。
 
+> 边界说明（2026-11-06）：本节的"它"指**通过连接器驱动的 Muse 工具面**——
+> 连接器只给 skill 文档列出的命令。Muse 的**云电脑（VM）执行环境**是另一回事：
+> 它可能装有 node 与 git（用 `PROBE-VM.md` 实测，不许凭印象）。只有实测通过、
+> 并且凭据被限制为单仓库 deploy key / fine-grained PAT 时，才允许走
+> [`MODE-B-SETUP.md`](MODE-B-SETUP.md) 的模式 B——那是给它的环境开了
+> 一条受控的口子，不是本节结论失效。模式 A 下本节逐字成立。
+
 ## 2. 我们这类自托管服务只能走"一个 Key"的形状
 
 证据：connectors.md 第 148 行（"Invented connect flows"一节）：没有内置

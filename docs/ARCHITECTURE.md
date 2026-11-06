@@ -7,21 +7,23 @@
 ```mermaid
 flowchart LR
   U[用户自然语言] --> M[Muse]
-  M -->|一个 Bearer Key| CC[custom connector 托管连接]
+  M -->|模式 B: 云电脑只跑 lotus.mjs| GH[GitHub 仓库 lotus-muse-site]
+  M -->|模式 A: 一个 Bearer Key| CC[custom connector 托管连接]
   CC --> API[Cloudflare Worker API lotus-muse-api]
-  API -->|细粒度 PAT 提交| GH[GitHub 仓库 lotus-muse-site]
-  API -->|Pages API Token 直传产物| PG[Cloudflare Pages 项目]
-  GH -->|Worker 提交后直传产物| PG
-  PG --> LIVE[线上站点 *.pages.dev]
-  LIVE -.->|live-verify 抓字节核对| API
+  API -->|细粒度 PAT 提交| GH
+  GH -->|push 触发| CI[GitHub Actions: 构建 site/]
+  CI --> LIVE[线上站点 GitHub Pages<br/>smartlotus.github.io/lotus-muse-site]
+  API -.->|可选尾巴: Pages Token 未配置, 停用| PG[Cloudflare Pages 旧副本<br/>lotus-muse-site.pages.dev]
+  LIVE -.->|live-verify 抓字节核对| M
 ```
 
 纯文本版（终端里看）：
 
 ```
-用户 --自然语言--> Muse --单个 Bearer Key--> Worker API
-     --细粒度 PAT--> GitHub 提交(main)
-     --Pages Token--> Pages 直传/或 Git 触发构建 --> 线上站点
+用户 --自然语言--> Muse
+  模式 B: Muse 云电脑 --只跑 scripts/lotus.mjs--> git push(main)
+  模式 A: Muse --单个 Bearer Key--> Worker API --细粒度 PAT--> GitHub 提交(main)
+git push --触发 GitHub Actions--> 构建 site/ --> GitHub Pages 线上站点
 线上站点 --live-verify.mjs 抓回字节--> 确认文字真的出现了
 ```
 
@@ -41,20 +43,22 @@ flowchart LR
 | 内容源数据 | `content/` | 记录与页面是 JSON，人可审、git 可回滚 |
 | 媒体源文件 | `media/` | 构建时复制进 `site/assets/media/` |
 | 写前快照 | `backups/` | 每次写操作前全量快照，restore 的原料 |
-| 构建产物 | `site/` | 直接提交进仓库，Pages 免构建命令，部署形态与既有 LotusSiteManager 的 `wrangler pages deploy` 一致 |
+| 构建产物 | `site/` | 提交进仓库；CI（`.github/workflows/pages.yml`）部署时重新构建一遍作核对，仓库内副本保证可追溯 |
 
 ## 为什么只有 Worker 持有特权凭据
 
 1. Muse 的自定义连接器只接受"一个 Base URL + 一个 API Key"（其文档
    connectors.md 第 148 行）。把 GitHub 或 Cloudflare 凭据递给 Muse
    既做不到（没有那种连接形状），也不应该（账号级特权）。
-2. Worker 是唯一的写入点：它内部拿两把互相独立的窄凭据。
+2. Worker（模式 A）是唯一的写入点：它内部拿两把互相独立的窄凭据。
    细粒度 PAT 只允许本仓库 contents 读写；Pages 上传 Token 只允许向
-   指定 Pages 项目传产物。任何一把泄漏都不给出另一把的能力。
+   指定 Pages 项目传产物（2026-11-06 起未配置，对应尾巴停用）。
+   任何一把泄漏都不给出另一把的能力。
 3. Muse 拿到的 Key 只是 Worker 的准入门票：它能触发 Worker 已实现的
-   十来个动作，动作背后 Worker 自己决定提交与部署。
-4. 部署顺序有因果关系：先 GitHub 提交成功，才直传 Pages；提交失败即整体
-   失败，不部署。这样仓库与线上不会漂移，git 历史永远是唯一真相。
+   十来个动作，动作背后 Worker 自己决定提交与部署。模式 B 下 Muse 拿到的是
+   单仓库 deploy key / fine-grained PAT，权限同样只有这一个仓库的 contents。
+4. 部署顺序有因果关系：先 GitHub 提交成功，push 触发 GitHub Actions 部署；
+   提交失败即整体失败，不部署。这样仓库与线上不会漂移，git 历史永远是唯一真相。
 
 ## 数据流（一次"加一条记录"）
 
@@ -65,9 +69,9 @@ Muse: POST /entries { ..., expect_sequence: N }
 Worker: 校验 -> 写前快照 backups/ -> 经 GitHub Contents API 提交
         content/entries/000N.json + 更新后的 site.json + journal.jsonl
         + 重建的 site/** （一次原子提交，作者 lotus-muse-bot）
-Worker: 提交成功 -> Pages 直传产物 -> 返回 commit_sha 与 deploy.url
-Muse: GET deploy.url 抓页面字节, 确认文字出现 -> 汇报用户
+Worker: 提交成功 -> push 触发 GitHub Actions 构建部署 -> 返回 commit_sha 与 deploy.url
+Muse: 等一两分钟, GET deploy.url 抓页面字节, 确认文字出现 -> 汇报用户
 ```
 
 本地 CLI 走同一条流水线的离线版：快照、写 JSON、追加 journal、
-重建 site/、`git add -A && git commit`（可选 push 触发 Pages）。
+重建 site/、`git add -A && git commit`（push 即触发同一套自动部署）。

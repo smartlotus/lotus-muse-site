@@ -53,8 +53,33 @@
 - [x] Worker 部署上线，`/health` 与 `/capabilities` 公网可达（B7、B8）
 - [x] 未鉴权写 → 401；鉴权 dry-run 写 → `planned_files` 完整且零外部调用（B8、B9；
   零网络那条由 `tests/worker.test.mjs` 的 fetch 间谍断言）
-- [ ] **配好 C1 后**：一次真实 `POST /entries` → GitHub 出现 `lotus-muse-bot` 提交 →
-  Pages 部署成功 → 线上页真的含新文本（Worker 提交代码路径目前只有注入式假 fetch 的单测覆盖，
-  未经真实 GitHub 验证）
 - [ ] **配好 C1+C3 后**：重部署 Worker 与 Pages，使线上版本追平仓库
   （当前线上 Worker 是 `7e04985a`，其后仓库还有 3 处修复；线上 Pages 是 2 条记录，仓库已是 3 条）
+
+## E. 第二轮审计（2026-11-06 下午 UTC，本轮）
+
+规则同前：每条都给"怎么复算"，没跑过的不写。这一轮的背景：部署通道在两轮之间
+被切到了 GitHub Pages（仓库出现 `6bfd6d7 ci: add GitHub Pages deploy workflow` 与
+`ff0f197 style: …` 两个提交），本轮据实审计并把全部文档口径对齐到新通道。
+
+| # | 事实 | 证据（可复算） |
+|---|---|---|
+| E1 | 部署主通道已是 GitHub Pages：`https://smartlotus.github.io/lotus-muse-site/`，`build_type=workflow`，状态 `built` | `gh api repos/smartlotus/lotus-muse-site/pages` → `html_url`/`status` |
+| E2 | push 即部署实测成立：`ff0f197`（style）push 后 run `42210875778` success（1m8s）；workflow 内容 = checkout → `node scripts/lotus.mjs build` → `deploy-pages@v4` | `gh run list --limit 5`；`.github/workflows/pages.yml` |
+| E3 | 线上内容 = 仓库内容：github.io 首页含 `命令行写入的一条记录`（#0003），并列出 `entries/0001..0003.html` | `curl -s https://smartlotus.github.io/lotus-muse-site/ \| grep -c 命令行写入的一条记录` → 1 |
+| E4 | Cloudflare Pages 旧副本停止追新：`lotus-muse-site.pages.dev` 返回 200 但不含 #0003，成为陈旧副本 | `curl -s https://lotus-muse-site.pages.dev/ \| grep -c 命令行写入` → 0 |
+| E5 | Worker 本机当前不可达：`curl https://lotus-muse-api.smartlotus1130.workers.dev/health` 连接超时（15s，HTTP 000）；当天上午（07:49Z）曾 200。疑似 `*.workers.dev` 直连被墙；Muse 云端/手机侧连通性未测 | `curl -sv --max-time 15 …/health` |
+| E6 | `.dev.vars` 里 `GITHUB_TOKEN` 与 `CLOUDFLARE_API_TOKEN` 为**空值**（len=0）→ C1（细粒度 PAT）从未完成；`MUSE_API_TOKEN` 在（`lm_` 前缀，35 字符） | `awk -F= '{print $1, length($2)}' .dev.vars` |
+| E7 | 本机对 `github.com:443` 的 git 通道走 HTTP/2 会被重置，HTTP/1.1 正常；已在仓库本地配置 `http.version=HTTP/1.1` 并完成 fast-forward 同步到 `ff0f197` | `git config --get http.version`；`git log --oneline -1` |
+| E8 | 本轮把 `base_url` 统一切到 github.io（`content/site.json`、`api/wrangler.toml`、`api/src/fallback-state.mjs` 经生成脚本重造、本地 `.dev.vars`），渲染产物不受影响（HTML 不含 base_url），`site/` 重建后零字节变化 | `git status --short`（只有 3 个配置文件）；`node scripts/lotus.mjs build` 前后 diff |
+| E9 | 契约与全部文档口径已对齐双通道事实：CONTRACT §0、README、RUNBOOK §2/§7/§8/§9、CONNECT-SETUP §4/§4.5、SKILL 的公开地址、新增 `muse/MODE-B-SETUP.md` | `grep -rn "pages.dev\|github.io" docs muse README.md` 逐条核对语境 |
+| E10 | 本轮测试与构建保持全绿：`npm test` 89/89；构建确定性维持 | `npm test` |
+
+### 第二轮之后仍欠的人工动作（更新版）
+
+| # | 需要你做的事 | 对应通道 |
+|---|---|---|
+| H1 | 给 Muse 的云电脑一把**单仓库凭据**：优先在 Muse VM 里生成 ed25519 密钥对，把公钥交给管理员（我）登记为 `lotus-muse-site` 的**只读/读写 deploy key**（可用 `gh api repos/smartlotus/lotus-muse-site/keys` 完成，无需你上 GitHub 网页）；或按 RUNBOOK §3.2 铸造 fine-grained PAT | 模式 B（推荐） |
+| H2 | （仅模式 A 需要）完成 C1 的 fine-grained PAT + 在 Muse 安全密钥入口填 `MUSE_API_TOKEN`（C2） | 模式 A |
+| H3 | （可选，二选一）Cloudflare 决策：a) 弃用 pages.dev 旧副本；或 b) `npx wrangler login` 后按 RUNBOOK §8 让它追平。不做也不影响 github.io 主站 | 遗留清理 |
+| H4 | 对 Muse 发出 `muse/MODE-B-SETUP.md` 里的首条指令，走完一次端到端验收 | 模式 B |

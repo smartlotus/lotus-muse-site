@@ -68,8 +68,10 @@ HTTP 接口，由接口去改仓库和部署"。** 下面是判据，不是推�
 - **绝不用本机 `gh` 的 token 当 Muse 通道。** `gh auth status` 实测 scopes 为
   `gist, read:org, repo, workflow`——`repo` 意味着**账号下全部仓库可写**，交出去等于交出整个 GitHub。
   这就是 §5 安全红线里最硬的一条（`docs/CONTRACT.md`）。
-- **新仓库，不动原仓库。** 你说得很明确。落地为 `smartlotus/lotus-muse-site`（私有，2026-11-06 新建）
-  与 Pages 项目 `lotus-muse-site`（同域 `lotus-muse-site.pages.dev`）。
+- **新仓库，不动原仓库。** 你说得很明确。落地为 `smartlotus/lotus-muse-site`（2026-11-06 新建，
+  后转公开以启用 GitHub Pages）
+  与 Pages 项目 `lotus-muse-site`（当时同域 `lotus-muse-site.pages.dev`；
+  当天下午部署通道切到 GitHub Pages，公开地址见 `content/site.json` 的 `base_url`）。
   `lotussblog`、`lotussmindstream` 及其本地副本**一个字节都不改**。
 
 ## 4. 代价与限制（不粉饰）

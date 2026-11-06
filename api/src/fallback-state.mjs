@@ -1,5 +1,5 @@
 // 由 scripts/make-fallback.mjs 生成，不要手改。
-export const GENERATED_AT = "2026-11-06T10:07:49.989Z";
+export const GENERATED_AT = "2026-11-06T15:55:55.506Z";
 
 export const STATE = {
   "site": {
@@ -10,7 +10,7 @@ export const STATE = {
     "subtitle": "由 Muse 维护的个人记录",
     "sort_direction": "newest_first",
     "next_sequence": 4,
-    "base_url": "https://lotus-muse-site.pages.dev",
+    "base_url": "https://smartlotus.github.io/lotus-muse-site/",
     "created_at": "2026-11-06T07:38:00.000Z",
     "updated_at": "2026-11-06T09:12:43Z"
   },

@@ -21,7 +21,13 @@
    注意：这是唯一一段"人来推第一次"的流程；之后的日常维护全部走
    `scripts/lotus.mjs --commit --push` 或 Muse 经 Worker，不再手工碰。
 
-## 2. 连接 Cloudflare Pages
+## 2. 连接 Cloudflare Pages（遗留章节，仅当你要 revival pages.dev 时才读）
+
+> 2026-11-06 更新：部署主通道已切到 **GitHub Pages**（`.github/workflows/pages.yml`，
+> push 到 main 自动构建 `site/` 并发布，公开地址
+> `https://smartlotus.github.io/lotus-muse-site/`）。下面的 Cloudflare Pages 直传
+> 不再是必经之路；`lotus-muse-site.pages.dev` 上留着一份停在 2 条记录的旧副本，
+> 要么弃用，要么 `npx wrangler login` 后按第 8 节追平。两件事都不影响主站。
 
 1. Cloudflare 控制台 -> Workers & Pages -> Create -> Pages -> Connect to Git，
    选 `lotus-muse-site`，production branch = `main`。
@@ -100,18 +106,27 @@ node scripts/live-verify.mjs --expect "<这次独有的文字>" --entry <seq>
 1. `node scripts/live-verify.mjs --expect ...` 先确认是不是"根本没写进去"。
 2. GitHub 仓库 `main` 分支上最新提交对不对？journal 最后一条对不对？
    不对 -> 是写入问题，查 Worker（下一步）；对 -> 是发布问题（再下一步）。
-3. Worker：`curl /health` 的 `mode` 是否 `live`； Workers 控制台看该 Worker
-   的实时日志（只有 action 与结果码，不含内容）。401 是门票问题，
-   503 `github_unauthenticated` 是 PAT 过期/被撤，502 `github_failed`
+3. Worker：`curl /health` 的 `mode` 是否 `live`。注意本机直连 `*.workers.dev`
+   可能超时（2026-11-06 下午实测 000），换网络或在 Muse 云端侧再测，别急着判死。
+   401 是门票问题，503 `github_unauthenticated` 是 PAT 过期/被撤，502 `github_failed`
    多半是远端领先冲突，让 Muse 重试一次或本地 `--push` 前先 pull。
-4. Pages：项目 Deployments 页看最新一次部署的分支与时间；
-   Git 触发部署偶尔排队，等一两分钟再验。
+4. 部署侧：公开地址是 **GitHub Pages**（`smartlotus.github.io/lotus-muse-site`），
+   去 GitHub 仓库的 Actions 页看 `Deploy to GitHub Pages` 最新 run 是否绿；
+   push 到 main 后通常一两分钟内完成。
 5. 缓存：`Ctrl+F5` 或加查询串（`/?v=2`）排除浏览器缓存；
    Pages 对 HTML 默认不缓存长，一般不是它。
 6. 都没问题但内容仍旧：检查 `content/site.json` 的 `base_url` 是否指向
    你正在看的域名（多项目并存时最容易错这里）。
 
-## 8. 把线上追平到仓库（本轮交付时留下的欠账）
+## 8. 把线上追平到仓库（已被 GitHub Pages 通道解决）
+
+> 2026-11-06 更新：本节写于 Cloudflare Pages 直传时代。现在线上追平由
+> GitHub Pages 通道天然完成——**仓库里的 main 永远就是线上内容**
+> （push → Actions 构建 → github.io 发布，见第 2 节的更新说明）。
+> 唯一的例外是 pages.dev 旧副本：它停在 2 条记录，按第 2 节的更新说明处置。
+
+<details>
+<summary>原始（Cloudflare 时代）步骤，存档备用</summary>
 
 本轮线上版本落后于仓库，原因是 wrangler 的 OAuth token 在 2026-11-06T08:01Z 到期，
 之后的两次部署动作没法再做。落后状态是明确的、可一次性补平的：
@@ -137,31 +152,28 @@ node ../scripts/live-verify.mjs --base https://lotus-muse-site.pages.dev --expec
 判据不是"deploy 打印了 Success"，而是最后一行 `live-verify` 全 PASS——
 它真的去公网取回字节并逐条断言。
 
-## 9. 切换到模式 B（Muse 用自己的云电脑直接跑 CLI）
+判据不是"deploy 打印了 Success"，而是最后一行 `live-verify` 全 PASS——
+它真的去公网取回字节并逐条断言。
+</details>
 
-只有当 `muse/PROBE-VM.md` 的四条能力都成立时才做。目的是让 Muse 只需一把单仓库 PAT，
-push 完 Pages 自己部署，从而不再需要 Worker、也不再需要 Cloudflare 凭据进它的会话。
+## 9. 模式 B：Muse 用自己的云电脑直接跑 CLI（当前推荐，部署前提已就绪）
 
-前提（这一步我没有实测，需要你在登录后确认，它只影响下面第 1 小步能不能成）：
-Cloudflare Pages 的 Git 集成依赖 GitHub 上的 **Cloudflare Pages App** 已被授权到该仓库。
-你账号下 `lotussblog`、`lotussmindstream` 等项目的 "Git Provider" 都是 Yes，说明这个 App 早就装好了；
-不确定的是它的授权范围是"All repositories"还是"Only select repositories"。
+本节的前提——"push 完自动部署"——已经由 GitHub Actions 实现（`.github/workflows/pages.yml`，
+push 到 main → 构建 `site/` → 发布到 github.io），而且**不需要 Cloudflare 侧的任何授权**
+（原计划的"Cloudflare Pages Git 绑定 + GitHub App 授权"不再需要）。所以模式 B 现在
+只差一件事：给 Muse 的 VM 一把**单仓库凭据**。完整步骤与给 Muse 的首条指令见
+[`muse/MODE-B-SETUP.md`](../muse/MODE-B-SETUP.md)，这里只留凭据的两条路：
 
-1. 给仓库授权（二选一）：
-   - GitHub → `smartlotus/lotus-muse-site` → Settings → Integrations → Cloudflare Pages → Add repository；
-   - 或者在 https://github.com/settings/installations 里把该 App 改成对所有仓库生效。
-2. 在 Cloudflare 侧开启 Git 构建（Dashboard 最稳：Workers & Pages → lotus-muse-site →
-   Settings → Build configs → Connect to Git，选 `main`）：
-   - Build command：`node scripts/lotus.mjs build`
-   - Output directory：`site`
-   - Root directory：仓库根
-3. 验证链路而不是验证配置：`node scripts/lotus.mjs add-entry … --commit --push`，
-   然后等 Pages 出新部署，再用
-   `node scripts/live-verify.mjs --base https://lotus-muse-site.pages.dev --expect <新记录标题>`
-   打到公网断言。**判据是线上字节里真的有这句话**，不是"push 成功了"。
-4. Worker 保留但降级：`api/` 不删，它仍是"任何没有本地工具链的助手"的入口；
-   模式 B 期间不需要给它配 `GITHUB_TOKEN`，它会自动停在 `dry-run`，这是预期状态而不是故障。
-5. 模式 B 的额外规矩（写进给 Muse 的首条指令里）：
+1. **deploy key（推荐）**：在 Muse 的 VM 里生成密钥对（`ssh-keygen -t ed25519`），
+   把**公钥**带回来，管理员在本机执行一条命令登记成 `lotus-muse-site` 的
+   只管本仓库的 deploy key：
+   `gh api repos/smartlotus/lotus-muse-site/keys -f title="muse-vm" -f read_only=false -f key=<公钥>`
+   （deploy key 天然只作用于这一个仓库、无到期、不可用于其他任何仓库。）
+2. **fine-grained PAT**：按第 3.2 节铸造，经 Muse 的官方安全入口注入；
+   若 Muse 只能"会话内贴一次"，也接受，但每次会话要重新给，且密钥会进对话记录
+   （风险自评见 `docs/SECURITY.md`）。
+
+模式 B 的硬规矩不变（写进给 Muse 的首条指令里）：
    - 只许调 `node scripts/lotus.mjs …`，**不许直接编辑 `site/` 下任何文件**；
    - 每次动手前先 `git fetch && git status`，工作区不干净就停下来报告而不是硬来；
    - 改完必须自己跑 `npm test` 与 `live-verify`，两样都绿才算做完；

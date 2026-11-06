@@ -6,7 +6,7 @@ compatibility_date = "2026-11-01"
 GITHUB_OWNER = "smartlotus"
 GITHUB_REPO = "lotus-muse-site"
 GITHUB_BRANCH = "main"
-PUBLIC_BASE_URL = "https://lotus-muse-site.pages.dev"
+PUBLIC_BASE_URL = "https://smartlotus.github.io/lotus-muse-site/"
 CLOUDFLARE_ACCOUNT_ID = "ff572908f83b35e7db8e764cc7d6f399"
 PAGES_PROJECT = "lotus-muse-site"
 
