@@ -1,0 +1,5 @@
+{"ts":"2026-11-06T13:20:00Z","actor":"local","action":"entry.create","target":"0001","commit_sha":null,"backup":null,"ok":true,"note":"初始迁移：第一条记录写清新仓库与 Muse 维护方式"}
+{"ts":"2026-11-08T14:05:00Z","actor":"muse","action":"entry.create","target":"0002","commit_sha":null,"backup":null,"ok":true,"note":"日常记录一条：傍晚下雨、清桌"}
+{"ts":null,"actor":"local","action":"restore","target":"backups/2026-11-06T07-40-59Z","commit_sha":null,"backup":"backups/2026-11-06T07-42-11Z","ok":true,"note":null}
+{"ts":"2026-11-06T07:52:07Z","actor":"local","action":"restore","target":"backups/2026-11-06T07-47-35Z","commit_sha":null,"backup":"backups/2026-11-06T07-52-06Z","ok":true,"note":null}
+{"ts":"2026-11-06T09:12:43Z","actor":"local","action":"entry.create","target":"0003","commit_sha":null,"backup":"backups/2026-11-06T09-12-43Z","ok":true,"note":"本机 e2e"}
