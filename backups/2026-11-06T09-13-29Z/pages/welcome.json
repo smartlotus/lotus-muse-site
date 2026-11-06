@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a43",
+  "slug": "welcome",
+  "title": "关于这个站点",
+  "subtitle": "新的记录从这里开始",
+  "body": "这里是 lotus 的个人记录。旧的内容仍在原仓库里，新的一切从这里开始。\n\n这个仓库的设计目标是：让日常维护可以被交出去。内容是一份份 JSON，页面由构建器生成，改动先提交仓库再部署线上，所以每一次变更都留下可核对的提交记录，也随时可以回滚。",
+  "template": "article",
+  "images": [],
+  "nav": true,
+  "created_at": "2026-11-06T07:38:00.000Z",
+  "updated_at": "2026-11-06T07:38:00.000Z",
+  "source": "local",
+  "author": "lotus"
+}
