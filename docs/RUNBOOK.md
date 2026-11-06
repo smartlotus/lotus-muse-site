@@ -137,7 +137,37 @@ node ../scripts/live-verify.mjs --base https://lotus-muse-site.pages.dev --expec
 判据不是"deploy 打印了 Success"，而是最后一行 `live-verify` 全 PASS——
 它真的去公网取回字节并逐条断言。
 
-## 9. 本地演练（不依赖任何云）
+## 9. 切换到模式 B（Muse 用自己的云电脑直接跑 CLI）
+
+只有当 `muse/PROBE-VM.md` 的四条能力都成立时才做。目的是让 Muse 只需一把单仓库 PAT，
+push 完 Pages 自己部署，从而不再需要 Worker、也不再需要 Cloudflare 凭据进它的会话。
+
+前提（这一步我没有实测，需要你在登录后确认，它只影响下面第 1 小步能不能成）：
+Cloudflare Pages 的 Git 集成依赖 GitHub 上的 **Cloudflare Pages App** 已被授权到该仓库。
+你账号下 `lotussblog`、`lotussmindstream` 等项目的 "Git Provider" 都是 Yes，说明这个 App 早就装好了；
+不确定的是它的授权范围是"All repositories"还是"Only select repositories"。
+
+1. 给仓库授权（二选一）：
+   - GitHub → `smartlotus/lotus-muse-site` → Settings → Integrations → Cloudflare Pages → Add repository；
+   - 或者在 https://github.com/settings/installations 里把该 App 改成对所有仓库生效。
+2. 在 Cloudflare 侧开启 Git 构建（Dashboard 最稳：Workers & Pages → lotus-muse-site →
+   Settings → Build configs → Connect to Git，选 `main`）：
+   - Build command：`node scripts/lotus.mjs build`
+   - Output directory：`site`
+   - Root directory：仓库根
+3. 验证链路而不是验证配置：`node scripts/lotus.mjs add-entry … --commit --push`，
+   然后等 Pages 出新部署，再用
+   `node scripts/live-verify.mjs --base https://lotus-muse-site.pages.dev --expect <新记录标题>`
+   打到公网断言。**判据是线上字节里真的有这句话**，不是"push 成功了"。
+4. Worker 保留但降级：`api/` 不删，它仍是"任何没有本地工具链的助手"的入口；
+   模式 B 期间不需要给它配 `GITHUB_TOKEN`，它会自动停在 `dry-run`，这是预期状态而不是故障。
+5. 模式 B 的额外规矩（写进给 Muse 的首条指令里）：
+   - 只许调 `node scripts/lotus.mjs …`，**不许直接编辑 `site/` 下任何文件**；
+   - 每次动手前先 `git fetch && git status`，工作区不干净就停下来报告而不是硬来；
+   - 改完必须自己跑 `npm test` 与 `live-verify`，两样都绿才算做完；
+   - 不提交 `.dev.vars`，不把我给你的 PAT 写进任何文件或提交记录。
+
+## 10. 本地演练（不依赖任何云）
 
 ```powershell
 node scripts/lotus.mjs build                    # 本地全量构建
