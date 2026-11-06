@@ -11,7 +11,7 @@ flowchart LR
   CC --> API[Cloudflare Worker API lotus-muse-api]
   API -->|细粒度 PAT 提交| GH[GitHub 仓库 lotus-muse-site]
   API -->|Pages API Token 直传产物| PG[Cloudflare Pages 项目]
-  GH -->|main 分支自动构建| PG
+  GH -->|Worker 提交后直传产物| PG
   PG --> LIVE[线上站点 *.pages.dev]
   LIVE -.->|live-verify 抓字节核对| API
 ```

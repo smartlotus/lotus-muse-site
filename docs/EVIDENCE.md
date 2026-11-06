@@ -33,6 +33,8 @@
 | B12 | 测试 89/89 全绿（model 27 / template 21 / build 合同 7 / http 路由 7 / gh 客户端 11 / worker 16） | 完成 | `npm test` |
 | B13 | 代码与内容已推送，且**远端 SHA 与本地相等** | 完成 `9abfd66342ed07667a8721c622038b617d064392` | `git rev-parse HEAD` 与 `gh api repos/smartlotus/lotus-muse-site/commits/main --jq .sha` 对读 |
 | B14 | 原仓库零改动：`lotussblog`、`lotussmindstream`、`LotusSiteManager` 及本地三份博客副本本轮未被写入 | 完成（只读检查） | `git -C .../lotussblog status`；目录 mtime |
+| B15 | 代码可移植性核查（决定"能不能让 Muse 在它自己的云电脑里直接跑"）：`package.json` 无任何 dependencies/devDependencies、盘上无 `node_modules`、外部命令只有 `git`（`scripts/lotus.mjs:277`）、路径全走 `path.join`/`path.sep`、无 `process.platform`/PowerShell/`.bat` 假设 | 成立 | `node -e "const p=require('./package.json');console.log(p.dependencies,p.devDependencies)"`；`grep -rn "win32\|powershell\|\.bat" scripts lib api` → 0 命中 |
+| B16 | 文档与实现的口径对账揪出并改掉两处假话：ARCHITECTURE 图里写 "main 分支自动构建"、CONNECT-SETUP 里写 "推送后 Pages 照常自动部署"——Pages 现在是直传形态，两者都不成立，已改为如实描述并给出真正生效的部署命令 | 完成 | `grep -rn "自动构建\|自动部署" docs muse` |
 
 ## C. 尚需人类动作（不是能力缺口，是授权边界）
 

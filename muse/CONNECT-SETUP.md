@@ -73,7 +73,22 @@ node scripts/lotus.mjs build
 node scripts/serve-api.mjs --dry-run --port 8787   # 本地起 API 演练
 ```
 
-推送后 Pages 照常自动部署。也就是说：Muse 是省事的通道，CLI 是永远在的通道。
+推送本身**不会**让线上更新：Pages 项目现在是"直传"形态（本轮建的就是这个形态），
+要让线上追平还得再跑一步部署：
+
+```powershell
+node scripts/lotus.mjs build
+npx --yes wrangler pages deploy site --project-name lotus-muse-site --branch main --commit-dirty=true
+```
+
+如果你按 `docs/RUNBOOK.md` 第 9 节把 Pages 换成 Git 自动构建，那么 push 即部署，上面这步就不需要了。
+也就是说：Muse 是省事的通道，CLI 是永远在的通道，而"部署"这一步现在仍是一次显式动作。
+
+## 4.5 另一种分工：让 Muse 在它自己的云电脑里跑这套 CLI
+
+这不是幻想，而且代码侧已经具备条件（零第三方依赖、外部命令只有 `git`）。
+它和"给 Muse 一个接口"是两种架构，凭据面与漂移风险都不一样。
+先用 `muse/PROBE-VM.md` 让 Muse 实测它那台机器的四项能力，再按 `docs/RUNBOOK.md` 第 9 节切换。
 
 ## 5. 断开与轮换
 
