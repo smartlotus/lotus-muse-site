@@ -3,7 +3,8 @@
 
 export class GitHubError extends Error {
   constructor(status, body, path) {
-    super(`GitHub HTTP ${status} @ ${path}`);
+    const detail = body && body.message ? ` — ${redact(body.message)}` : "";
+    super(`GitHub HTTP ${status} @ ${path}${detail}`);
     this.name = "GitHubError";
     this.status = status;
     this.body = body;
@@ -136,6 +137,11 @@ export class GitHubClient {
   }
 
   async put({ path, content, sha, message, author }) {
+    if (!sha) {
+      // 缺 sha 就先读一次：覆盖必须基于当前版本，否则并发写会静默吃掉对方的改动
+      const cur = await this.getFile(path);
+      sha = cur.sha;
+    }
     const body = {
       message,
       content: bytesToB64(

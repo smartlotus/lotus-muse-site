@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="generator" content="lotus-muse-site">
-  <title>本地 CLI 验收 · lotus 日志</title>
+  <title>命令行写入的一条记录 · lotus 日志</title>
   <link rel="stylesheet" href="/assets/site.css">
 </head>
 <body>
@@ -24,14 +24,16 @@
     <section class="entry-single" aria-label="记录正文">
       <article class="log-entry" id="entry-0003">
         <div class="log-meta">
-          <time class="log-date">2026.11.8 下午</time>
+          <time class="log-date">2026.11.6 下午</time>
           <span class="log-sequence">#0003</span>
         </div>
         <div class="log-content">
-          <h2 class="entry-title">本地 CLI 验收</h2>
-          <p>marker-9f3c71-local-cli-run 这条是 scripts/lotus.mjs 写入的验收记录</p>
+          <h2 class="entry-title">命令行写入的一条记录</h2>
+          <p>这一条是用本机命令行写入的，用来验证同一套内容模型在&quot;没有 Worker、没有 Muse&quot;的路径上也能走通：<br>写入前先快照，序号自动接续，构建产物与数据一起变更。</p>
+          <p>命令行与 Worker 走的是同一份 lib，所以两条路产生的结果可以逐字节对比。</p>
           <ul class="tag-list">
-            <li>验收</li>
+            <li>验证</li>
+            <li>命令行</li>
           </ul>
         </div>
         <nav class="entry-nav" aria-label="记录翻页">

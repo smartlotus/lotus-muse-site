@@ -6,7 +6,7 @@
   "description": "lotus 个人站点：内容即数据，由 Cloudflare Worker API 代写并提交，Cloudflare Pages 自动部署，维护方为 Meta Muse。",
   "engines": { "node": ">=20" },
   "scripts": {
-    "test": "node --test tests/",
+    "test": "node --test",
     "build": "node scripts/lotus.mjs rebuild",
     "verify": "node scripts/live-verify.mjs"
   }

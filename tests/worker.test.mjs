@@ -219,12 +219,21 @@ test("空正文 / 超长正文 / 坏日期 报 invalid_input 并带字段名", a
 });
 
 test("图片过大 -> 413", async () => {
-  const big = "A".repeat(6 * 1024 * 1024); // ~6 MiB 解码后
+  // base64 是 4/3 膨胀：8 MiB 的 base64 解码后约 6 MiB，才真超过 5 MiB 上限
+  const big = "A".repeat(8 * 1024 * 1024);
   const r = await call("POST", "/entries", {
     token: TOKEN,
     body: { date: "2026.11.6", body: "正文", images: [{ base64: big, path: "shot.png" }] },
   });
   assert.equal(r.status, 413, r.text.slice(0, 200));
+  assert.equal(r.json.error.code, "too_large");
+
+  // 反向对照：4.5 MiB（未超限）不该被拒
+  const okSize = await call("POST", "/entries", {
+    token: TOKEN,
+    body: { date: "2026.11.6", body: "正文", images: [{ base64: "A".repeat(6 * 1024 * 1024), path: "ok.png" }] },
+  });
+  assert.equal(okSize.status, 200, okSize.text.slice(0, 200));
 });
 
 test("删记录会计划删除对应产物页，序号不回收", async () => {

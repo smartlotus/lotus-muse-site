@@ -482,23 +482,33 @@ const routes = [
     async handler({ request, env, state }) {
       const body = await readJson(request);
       if (body.__failure) return body.__failure;
-      const v = validateEntryInput(body);
-      if (!v.ok) return validationFailure(v);
       if (body.expect_sequence != null && body.expect_sequence !== state.site.next_sequence) {
         return fail("conflict_sequence", "序号与你上次读到的不一致，请重新 GET /site 后再试", {
           details: { actual: state.site.next_sequence, sent: body.expect_sequence },
         });
       }
       const seq = state.site.next_sequence;
+      // 图片先单独过一道：越界路径给 unsafe_path、超限体积给 too_large，
+      // 这两件事比"字段不合模型"更具体，混在通用校验里会让 Muse 收到无用的 400。
       const media = [];
+      const kept = [];
+      let totalBytes = 0;
       for (const img of body.images || []) {
         const m = imageToMedia(img, isoDateDir(body.date));
         if (m.failure) return m.failure;
-        if (m.bytes) media.push(m);
+        if (m.bytes) {
+          totalBytes += m.bytes.byteLength;
+          if (totalBytes > MEDIA_TOTAL) return fail("too_large", `图片总量超过 ${MEDIA_TOTAL} 字节上限`);
+          media.push(m);
+          kept.push({ path: m.path, alt: m.alt || "日志图片" });
+        } else if (m.existing) {
+          kept.push({ path: m.existing, alt: m.alt || "日志图片" });
+        }
       }
+      const v = validateEntryInput({ ...body, images: kept });
+      if (!v.ok) return validationFailure(v);
       const entry = normalizeEntry(
-        { ...body, images: [ ...(body.images || []).filter((i) => i.path).map((i) => ({ path: i.path, alt: i.alt || "日志图片" })),
-            ...media.map((m) => ({ path: m.path, alt: m.alt || "日志图片" })) ] },
+        { ...body, images: kept },
         { sequence: seq, id: newId(), created_at: nowIso(), updated_at: nowIso(), source: "muse", author: "lotus-muse-bot" },
       );
       return commitMutation(
